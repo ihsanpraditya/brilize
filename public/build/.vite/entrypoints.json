@@ -2,13 +2,9 @@
   "base": "/brilize/build/",
   "entryPoints": {
     "app": {
-      "css": [],
-      "dynamic": [],
       "js": [
-        "/brilize/build/assets/app-DEhmADDG.js"
-      ],
-      "legacy": false,
-      "preload": []
+        "http://[::1]:5174/brilize/build/assets/app.ts"
+      ]
     }
   },
   "legacy": false,
@@ -19,5 +15,5 @@
     2,
     4
   ],
-  "viteServer": null
+  "viteServer": "http://[::1]:5174"
 }
