@@ -1,7 +1,15 @@
 # README
 
-## Deployment
+## Docker
 
+Saya develop aplikasinya di docker untuk menyamakan dengan ekosistem shared hosting sehingga aplikasi dapat menggapai banyak kalangan.
+
+## Bun/Node
+
+Saya pakai bun ya, untuk menjalankan nya jangan di docker.
+
+## Deployment
+ia
 Setting route aplikasi ini ditujukan menggunakan subdomain /brilize. Sehingga
 jika diupload ke server akan menjadi namadomain.com/brilize.
 
