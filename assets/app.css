@@ -1,5 +1,43 @@
 @import "tailwindcss";
+@plugin "daisyui";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Define raw values for both light and dark states */
+:root {
+  --color-primary: hsl(262.1 83.3% 57.8%);
+  --color-secondary: hsl(220 14.3% 95.9%);
+  --color-muted: hsl(220 14.3% 95.9%);
+  --color-accent: hsl(220 14.3% 95.9%);
+  --color-warning: hsl(0 84.2% 60.2%);
+  --color-danger: hsl(220 13% 91%);
+  --color-info: hsl(220 13% 91%);
+  --color-success: hsl(262.1 83.3% 57.8%);
+}
+
+.dark {
+  --color-primary: hsl(263.4 70% 50.4%);
+  --color-secondary: hsl(215 27.9% 16.9%);
+  --color-muted: hsl(215 27.9% 16.9%);
+  --color-accent: hsl(215 27.9% 16.9%);
+  --color-warning: hsl(0 62.8% 30.6%);
+  --color-danger: hsl(215 27.9% 16.9%);
+  --color-info: hsl(215 27.9% 16.9%);
+  --color-success: hsl(263.4 70% 50.4%);
+}
+
+/* Register variables to Tailwind v4 Engine */
+@theme {
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-muted: var(--color-muted);
+  --color-accent: var(--color-accent);
+  --color-warning: var(--color-destructive);
+  --color-danger: var(--color-border);
+  --color-info: var(--color-input);
+  --color-success: var(--color-ring);
+}
 
 body {
-  background-color: #eeeeee;
+  background-color: var(--color-primary);
 }
