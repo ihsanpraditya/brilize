@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import symfonyPlugin from 'vite-plugin-symfony';
 
 export default defineConfig({
+  base: '/brilize/build/',
   plugins: [
     vue(),
     symfonyPlugin(),

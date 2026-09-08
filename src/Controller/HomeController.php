@@ -13,4 +13,10 @@ class HomeController
     {
         return $inertia->render('Home/Index');
     }
+
+    #[Route('/public', name: 'public', methods: ['GET'])]
+    public function public(): Response
+    {
+        return new Response('public');
+    }
 }
