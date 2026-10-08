@@ -7,6 +7,9 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/doctrine-bundle": "^3.3",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
+        "doctrine/orm": "^3.7",
         "nytodev/inertia-bundle": "^3.1",
         "pentatrion/vite-bundle": "^8.2",
         "symfony/apache-pack": "*",
@@ -67,5 +70,8 @@
             "allow-contrib": false,
             "require": "7.4.*"
         }
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.68"
     }
 }
