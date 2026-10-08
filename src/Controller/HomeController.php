@@ -1,22 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
+use App\Service\DashboardService;
+use Nytodev\InertiaBundle\Service\Inertia;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Nytodev\InertiaBundle\Service\Inertia;
 
-class HomeController
+final class HomeController extends AbstractController
 {
     #[Route('/', name: 'home', methods: ['GET'])]
-    public function index(Inertia $inertia): Response
+    public function index(Request $request, DashboardService $dashboardService, Inertia $inertia): Response
     {
-        return $inertia->render('Home/Index');
-    }
+        $session = $request->getSession();
+        
+        $isLoggedIn = (bool) $session->get('user_logged_in', false);
+        if (!$isLoggedIn) {
+            return $this->redirectToRoute('auth_login');
+        }
 
-    #[Route('/public', name: 'public', methods: ['GET'])]
-    public function public(): Response
-    {
-        return new Response('public');
+        $userName = (string) $session->get('user_name', 'Administrator');
+        $userIdentifier = (string) $session->get('user_identifier', 'admin');
+        $userRoles = (array) $session->get('user_roles', ['ROLE_USER']);
+
+        $dashboardData = $dashboardService->getDashboardSummary($userIdentifier);
+
+        return $inertia->render('Home/Index', [
+            'auth' => [
+                'user' => [
+                    'name' => $userName,
+                    'identifier' => $userIdentifier,
+                    'roles' => $userRoles,
+                ],
+            ],
+            'dashboard' => $dashboardData,
+        ]);
     }
 }
