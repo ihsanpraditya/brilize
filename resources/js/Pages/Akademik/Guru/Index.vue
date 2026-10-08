@@ -214,7 +214,7 @@ function hapus(item: PegawaiItem) {
     <Head title="Data Guru & PTK - ERP Sekolah" />
 
     <div class="space-y-6">
-      
+
       <!-- Page Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -230,7 +230,7 @@ function hapus(item: PegawaiItem) {
 
       <!-- Statistik Kepegawaian Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
+
         <div class="stat bg-base-100 rounded-2xl shadow-sm border border-base-200 p-4">
           <div class="stat-title text-xs font-semibold uppercase">Total SDM Sekolah</div>
           <div class="stat-value text-primary text-2xl mt-1">{{ props.options.statistik.total }}</div>
@@ -239,7 +239,7 @@ function hapus(item: PegawaiItem) {
 
         <div class="stat bg-base-100 rounded-2xl shadow-sm border border-base-200 p-4">
           <div class="stat-title text-xs font-semibold uppercase">Tenaga Pendidik (Guru)</div>
-          <div class="stat-value text-info text-2xl mt-1">{{ props.options.statistik.totalPendidik }}</div>
+          <div class="stat-value text-info text-2xl mt-1">{{ props.options.statistik.totalPendidik }}</div> <!-- teks ini kurang terbaca -->
           <div class="stat-desc text-xs mt-1">Guru Mapel & BK</div>
         </div>
 
@@ -263,7 +263,7 @@ function hapus(item: PegawaiItem) {
 
       <!-- Kategori Filter Tabs & Search Filter -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        
+
         <!-- Tabs -->
         <div class="tabs tabs-box bg-base-200 p-1 rounded-2xl w-fit">
           <button
@@ -326,7 +326,7 @@ function hapus(item: PegawaiItem) {
               </thead>
               <tbody>
                 <tr v-for="item in props.pegawaiList" :key="item.id" class="hover">
-                  
+
                   <!-- Nama & Identitas -->
                   <td>
                     <div class="flex items-center gap-3">
@@ -348,7 +348,7 @@ function hapus(item: PegawaiItem) {
 
                   <!-- Kategori & Jabatan -->
                   <td>
-                    <span class="badge badge-sm font-semibold" :class="item.kategoriPegawaiBadge">
+                    <span class="badge badge-sm font-semibold" :class="item.kategoriPegawaiBadge"> <!-- badge-secondary membuat badge ini susah dibaca di mode light -->
                       {{ item.kategoriPegawaiLabel }}
                     </span>
                     <div class="text-xs text-base-content/75 mt-0.5">
@@ -430,7 +430,7 @@ function hapus(item: PegawaiItem) {
         </h3>
 
         <form @submit.prevent="submit" class="space-y-4">
-          
+
           <!-- Kategori Pegawai & Jenis -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-base-200/60 rounded-2xl">
             <div class="form-control">
