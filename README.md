@@ -9,7 +9,6 @@ Saya develop aplikasinya di docker untuk menyamakan dengan ekosistem shared host
 Saya pakai bun ya, untuk menjalankan nya jangan di docker.
 
 ## Deployment
-ia
 Setting route aplikasi ini ditujukan menggunakan subdomain /brilize. Sehingga
 jika diupload ke server akan menjadi namadomain.com/brilize.
 
@@ -41,3 +40,19 @@ nama brilize. Perlu override htaccess
     RewriteRule ^ index.php [L]
 </IfModule>
 ```
+
+### Login PSQL
+
+```bash
+docker exec -it brilize-database-1 psql -U app -d app
+```
+
+**Beberapa query psql yang sering dipakai**:
+
+\dt : Menampilkan daftar tabel yang ada di database.
+
+\l : Menampilkan daftar semua database.
+
+\d nama_tabel : Melihat struktur/skema dari suatu tabel.
+
+\q : Keluar dari CLI psql dan kembali ke terminal host.
