@@ -398,11 +398,56 @@ function hapusSiswa(id: number, nama: string) {
 
 ---
 
-## 5. Checklist Validasi & Best Practices
+---
+
+## 5. Konfigurasi Menu Navigasi Sidebar (`Sidebar.vue`)
+
+Saat menambahkan modul baru pada ERP Sekolah, daftarkan rute halaman ke dalam konfigurasi array `navigationSections` di **`src/resources/js/Components/Sidebar.vue`**:
+
+```typescript
+// resources/js/Components/Sidebar.vue
+interface NavItem {
+  label: string
+  href: string
+  icon: string        // SVG path string 'd' attribute
+  roles?: string[]    // Opsional: batasan role (contoh: ['ROLE_SUPER_ADMIN', 'ROLE_TU'])
+  badge?: string      // Opsional: label badge (contoh: 'Baru')
+  badgeClass?: string // Opsional: 'badge-primary' | 'badge-warning', dll.
+}
+
+interface NavSection {
+  title?: string      // Judul kategori (contoh: 'AKADEMIK', 'KEUANGAN')
+  roles?: string[]
+  items: NavItem[]
+}
+
+const navigationSections: NavSection[] = [
+  {
+    title: 'NAMA_MODUL_BARU',
+    items: [
+      {
+        label: 'Sub Modul',
+        href: '/nama-modul/sub-fitur',
+        icon: 'M...', // SVG Path Data
+        roles: ['ROLE_SUPER_ADMIN', 'ROLE_GURU'], // Opsional
+      },
+    ],
+  },
+]
+```
+
+### Karakteristik Navigasi:
+- **Active State Otomatis**: Helper `isActive(item.href)` otomatis memeriksa kecocokan URL aktif dengan Inertia `usePage().url`.
+- **Role Permission Filter**: Item menu yang memiliki properti `roles` hanya akan tampil bagi pengguna dengan role yang bersesuaian.
+
+---
+
+## 6. Checklist Validasi & Best Practices
 
 1. **Strict 3-Tier Separation**:
    - Controller *hanya* berurusan dengan HTTP & Inertia view dispatching.
    - Service *hanya* berurusan dengan business logic, validasi, dan orkestrasinya.
    - Repository *hanya* berurusan dengan Doctrine query & persistensi.
-2. **DTO for Data Transport**: Selalu gunakan DTO untuk parsing request dan response agar payload type-safe dan aman dari kebocoran data sensitif.
-3. **Frontend Package Management**: Selalu gunakan `bun` (`bun run dev`, `bun run build`, `bun add <pkg>`).
+2. **DTO for Data Transport**: Selalu gunakan DTO untuk parsing request (`$request->getPayload()`) dan response agar payload type-safe dan aman dari kebocoran data sensitif.
+3. **Pendaftaran Menu**: Setiap pembuatan modul halaman baru wajib didaftarkan di `navigationSections` di `Sidebar.vue`.
+4. **Frontend Package Management**: Selalu gunakan `bun` (`bun run dev`, `bun run build`, `bun add <pkg>`).
