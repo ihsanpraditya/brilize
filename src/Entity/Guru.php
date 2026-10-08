@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use App\Enum\JenisKelamin;
 use App\Repository\GuruRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -27,6 +29,15 @@ class Guru
     #[ORM\OneToOne(targetEntity: Pegawai::class, inversedBy: 'guru')]
     #[ORM\JoinColumn(name: 'pegawai_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Pegawai $pegawai;
+
+    /**
+     * Daftar Mata Pelajaran yang diampu oleh Guru (Relasi Many-to-Many)
+     * 1 Guru dapat mengajar banyak Mapel, dan 1 Mapel dapat diampu banyak Guru
+     *
+     * @var Collection<int, MataPelajaran>
+     */
+    #[ORM\ManyToMany(targetEntity: MataPelajaran::class, mappedBy: 'guruPengampuList')]
+    private Collection $mataPelajaranList;
 
     /**
      * Bidang studi / mata pelajaran yang diampu, contoh: "Matematika", "Bahasa Inggris"
@@ -67,6 +78,7 @@ class Guru
     public function __construct()
     {
         $this->isSertifikasi = false;
+        $this->mataPelajaranList = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -98,6 +110,41 @@ class Guru
     {
         $this->pegawai = $pegawai;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, MataPelajaran>
+     */
+    public function getMataPelajaranList(): Collection
+    {
+        return $this->mataPelajaranList;
+    }
+
+    public function addMataPelajaran(MataPelajaran $mapel): self
+    {
+        if (!$this->mataPelajaranList->contains($mapel)) {
+            $this->mataPelajaranList->add($mapel);
+            $mapel->addGuruPengampu($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMataPelajaran(MataPelajaran $mapel): self
+    {
+        if ($this->mataPelajaranList->removeElement($mapel)) {
+            $mapel->removeGuruPengampu($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getDaftarNamaMapel(): array
+    {
+        return $this->mataPelajaranList->map(fn(MataPelajaran $m) => $m->getNamaMapel())->toArray();
     }
 
     public function getBidangStudiUtama(): ?string
