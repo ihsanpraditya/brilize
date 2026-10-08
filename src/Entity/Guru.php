@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Enum\JenisKepegawaian;
 use App\Enum\JenisKelamin;
-use App\Enum\StatusKepegawaian;
 use App\Repository\GuruRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GuruRepository::class)]
 #[ORM\Table(name: 'guru')]
-#[ORM\Index(name: 'idx_guru_nip', columns: ['nip'])]
-#[ORM\Index(name: 'idx_guru_nuptk', columns: ['nuptk'])]
-#[ORM\Index(name: 'idx_guru_status_pegawai', columns: ['status_kepegawaian'])]
-#[ORM\Index(name: 'idx_guru_jenis_pegawai', columns: ['jenis_kepegawaian'])]
-#[ORM\Index(name: 'idx_guru_is_active', columns: ['is_active'])]
+#[ORM\Index(name: 'idx_guru_pegawai', columns: ['pegawai_id'])]
+#[ORM\Index(name: 'idx_guru_bidang_studi', columns: ['bidang_studi_utama'])]
 #[ORM\HasLifecycleCallbacks]
 class Guru
 {
@@ -27,77 +22,41 @@ class Guru
     private ?int $id = null;
 
     /**
-     * Akun User untuk autentikasi sistem (opsional jika belum dibuatkan login)
+     * Relasi ke entitas induk Pegawai (biodata & status kepegawaian)
      */
-    #[ORM\OneToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?User $user = null;
+    #[ORM\OneToOne(targetEntity: Pegawai::class, inversedBy: 'guru')]
+    #[ORM\JoinColumn(name: 'pegawai_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private Pegawai $pegawai;
 
     /**
-     * Nomor Induk Pegawai (PNS/PPPK)
+     * Bidang studi / mata pelajaran yang diampu, contoh: "Matematika", "Bahasa Inggris"
      */
-    #[ORM\Column(type: Types::STRING, length: 30, unique: true, nullable: true)]
-    private ?string $nip = null;
+    #[ORM\Column(name: 'bidang_studi_utama', type: Types::STRING, length: 100, nullable: true)]
+    private ?string $bidangStudiUtama = null;
 
     /**
-     * Nomor Unik Pendidik dan Tenaga Kependidikan (Kemendikbud)
+     * Status kelulusan sertifikasi pendidik (PPG / TPG)
      */
-    #[ORM\Column(type: Types::STRING, length: 30, unique: true, nullable: true)]
-    private ?string $nuptk = null;
+    #[ORM\Column(name: 'is_sertifikasi', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $isSertifikasi = false;
 
     /**
-     * Nomor Induk Kependudukan (KTP)
+     * Nomor Registrasi Guru (NRG) atau No. Peserta Sertifikasi
      */
-    #[ORM\Column(type: Types::STRING, length: 20, unique: true, nullable: true)]
-    private ?string $nik = null;
+    #[ORM\Column(name: 'no_sertifikasi', type: Types::STRING, length: 50, nullable: true)]
+    private ?string $noSertifikasi = null;
 
-    #[ORM\Column(name: 'nama_lengkap', type: Types::STRING, length: 150)]
-    private string $namaLengkap;
+    /**
+     * Tugas tambahan, contoh: "Wali Kelas X-RPL-1", "Kepala Bengkel RPL", "Pembina OSIS"
+     */
+    #[ORM\Column(name: 'tugas_tambahan', type: Types::STRING, length: 100, nullable: true)]
+    private ?string $tugasTambahan = null;
 
-    #[ORM\Column(name: 'gelar_depan', type: Types::STRING, length: 20, nullable: true)]
-    private ?string $gelarDepan = null;
-
-    #[ORM\Column(name: 'gelar_belakang', type: Types::STRING, length: 50, nullable: true)]
-    private ?string $gelarBelakang = null;
-
-    #[ORM\Column(name: 'jenis_kelamin', type: Types::STRING, length: 1, enumType: JenisKelamin::class)]
-    private JenisKelamin $jenisKelamin = JenisKelamin::LAKI_LAKI;
-
-    #[ORM\Column(name: 'tempat_lahir', type: Types::STRING, length: 100, nullable: true)]
-    private ?string $tempatLahir = null;
-
-    #[ORM\Column(name: 'tanggal_lahir', type: Types::DATE_IMMUTABLE, nullable: true)]
-    private ?\DateTimeImmutable $tanggalLahir = null;
-
-    #[ORM\Column(type: Types::STRING, length: 30, nullable: true)]
-    private ?string $agama = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $alamat = null;
-
-    #[ORM\Column(name: 'nomor_hp', type: Types::STRING, length: 20, nullable: true)]
-    private ?string $nomorHp = null;
-
-    #[ORM\Column(type: Types::STRING, length: 180, nullable: true)]
-    private ?string $email = null;
-
-    #[ORM\Column(name: 'jenis_kepegawaian', type: Types::STRING, length: 30, enumType: JenisKepegawaian::class)]
-    private JenisKepegawaian $jenisKepegawaian = JenisKepegawaian::GURU_MAPEL;
-
-    #[ORM\Column(name: 'status_kepegawaian', type: Types::STRING, length: 20, enumType: StatusKepegawaian::class)]
-    private StatusKepegawaian $statusKepegawaian = StatusKepegawaian::HONORER;
-
-    #[ORM\Column(name: 'pendidikan_terakhir', type: Types::STRING, length: 50, nullable: true)]
-    private ?string $pendidikanTerakhir = 'S1';
-
-    #[ORM\Column(name: 'jurusan_pendidikan', type: Types::STRING, length: 100, nullable: true)]
-    private ?string $jurusanPendidikan = null;
-
-    #[ORM\Column(name: 'foto_url', type: Types::STRING, length: 255, nullable: true)]
-    private ?string $fotoUrl = null;
-
-    #[ORM\Column(name: 'is_active', type: Types::BOOLEAN, options: ['default' => true])]
-    private bool $isActive = true;
+    /**
+     * Terhitung Mulai Tanggal (TMT) awal mengajar
+     */
+    #[ORM\Column(name: 'tmt_pendidik', type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $tmtPendidik = null;
 
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
@@ -107,10 +66,7 @@ class Guru
 
     public function __construct()
     {
-        $this->jenisKelamin = JenisKelamin::LAKI_LAKI;
-        $this->jenisKepegawaian = JenisKepegawaian::GURU_MAPEL;
-        $this->statusKepegawaian = StatusKepegawaian::HONORER;
-        $this->isActive = true;
+        $this->isSertifikasi = false;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -133,235 +89,69 @@ class Guru
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getPegawai(): Pegawai
     {
-        return $this->user;
+        return $this->pegawai;
     }
 
-    public function setUser(?User $user): self
+    public function setPegawai(Pegawai $pegawai): self
     {
-        $this->user = $user;
+        $this->pegawai = $pegawai;
         return $this;
     }
 
-    public function getNip(): ?string
+    public function getBidangStudiUtama(): ?string
     {
-        return $this->nip;
+        return $this->bidangStudiUtama;
     }
 
-    public function setNip(?string $nip): self
+    public function setBidangStudiUtama(?string $bidangStudiUtama): self
     {
-        $this->nip = $nip !== null && trim($nip) !== '' ? trim($nip) : null;
+        $this->bidangStudiUtama = $bidangStudiUtama !== null ? trim($bidangStudiUtama) : null;
         return $this;
     }
 
-    public function getNuptk(): ?string
+    public function isSertifikasi(): bool
     {
-        return $this->nuptk;
+        return $this->isSertifikasi;
     }
 
-    public function setNuptk(?string $nuptk): self
+    public function setIsSertifikasi(bool $isSertifikasi): self
     {
-        $this->nuptk = $nuptk !== null && trim($nuptk) !== '' ? trim($nuptk) : null;
+        $this->isSertifikasi = $isSertifikasi;
         return $this;
     }
 
-    public function getNik(): ?string
+    public function getNoSertifikasi(): ?string
     {
-        return $this->nik;
+        return $this->noSertifikasi;
     }
 
-    public function setNik(?string $nik): self
+    public function setNoSertifikasi(?string $noSertifikasi): self
     {
-        $this->nik = $nik !== null && trim($nik) !== '' ? trim($nik) : null;
+        $this->noSertifikasi = $noSertifikasi !== null ? trim($noSertifikasi) : null;
         return $this;
     }
 
-    public function getNamaLengkap(): string
+    public function getTugasTambahan(): ?string
     {
-        return $this->namaLengkap;
+        return $this->tugasTambahan;
     }
 
-    public function setNamaLengkap(string $namaLengkap): self
+    public function setTugasTambahan(?string $tugasTambahan): self
     {
-        $this->namaLengkap = trim($namaLengkap);
+        $this->tugasTambahan = $tugasTambahan !== null ? trim($tugasTambahan) : null;
         return $this;
     }
 
-    public function getGelarDepan(): ?string
+    public function getTmtPendidik(): ?\DateTimeImmutable
     {
-        return $this->gelarDepan;
+        return $this->tmtPendidik;
     }
 
-    public function setGelarDepan(?string $gelarDepan): self
+    public function setTmtPendidik(?\DateTimeImmutable $tmtPendidik): self
     {
-        $this->gelarDepan = $gelarDepan !== null && trim($gelarDepan) !== '' ? trim($gelarDepan) : null;
-        return $this;
-    }
-
-    public function getGelarBelakang(): ?string
-    {
-        return $this->gelarBelakang;
-    }
-
-    public function setGelarBelakang(?string $gelarBelakang): self
-    {
-        $this->gelarBelakang = $gelarBelakang !== null && trim($gelarBelakang) !== '' ? trim($gelarBelakang) : null;
-        return $this;
-    }
-
-    public function getNamaDenganGelar(): string
-    {
-        $nama = $this->namaLengkap;
-        if ($this->gelarDepan) {
-            $nama = $this->gelarDepan . ' ' . $nama;
-        }
-        if ($this->gelarBelakang) {
-            $nama = $nama . ', ' . $this->gelarBelakang;
-        }
-        return $nama;
-    }
-
-    public function getJenisKelamin(): JenisKelamin
-    {
-        return $this->jenisKelamin;
-    }
-
-    public function setJenisKelamin(JenisKelamin $jenisKelamin): self
-    {
-        $this->jenisKelamin = $jenisKelamin;
-        return $this;
-    }
-
-    public function getTempatLahir(): ?string
-    {
-        return $this->tempatLahir;
-    }
-
-    public function setTempatLahir(?string $tempatLahir): self
-    {
-        $this->tempatLahir = $tempatLahir;
-        return $this;
-    }
-
-    public function getTanggalLahir(): ?\DateTimeImmutable
-    {
-        return $this->tanggalLahir;
-    }
-
-    public function setTanggalLahir(?\DateTimeImmutable $tanggalLahir): self
-    {
-        $this->tanggalLahir = $tanggalLahir;
-        return $this;
-    }
-
-    public function getAgama(): ?string
-    {
-        return $this->agama;
-    }
-
-    public function setAgama(?string $agama): self
-    {
-        $this->agama = $agama;
-        return $this;
-    }
-
-    public function getAlamat(): ?string
-    {
-        return $this->alamat;
-    }
-
-    public function setAlamat(?string $alamat): self
-    {
-        $this->alamat = $alamat;
-        return $this;
-    }
-
-    public function getNomorHp(): ?string
-    {
-        return $this->nomorHp;
-    }
-
-    public function setNomorHp(?string $nomorHp): self
-    {
-        $this->nomorHp = $nomorHp;
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(?string $email): self
-    {
-        $this->email = $email !== null ? strtolower(trim($email)) : null;
-        return $this;
-    }
-
-    public function getJenisKepegawaian(): JenisKepegawaian
-    {
-        return $this->jenisKepegawaian;
-    }
-
-    public function setJenisKepegawaian(JenisKepegawaian $jenisKepegawaian): self
-    {
-        $this->jenisKepegawaian = $jenisKepegawaian;
-        return $this;
-    }
-
-    public function getStatusKepegawaian(): StatusKepegawaian
-    {
-        return $this->statusKepegawaian;
-    }
-
-    public function setStatusKepegawaian(StatusKepegawaian $statusKepegawaian): self
-    {
-        $this->statusKepegawaian = $statusKepegawaian;
-        return $this;
-    }
-
-    public function getPendidikanTerakhir(): ?string
-    {
-        return $this->pendidikanTerakhir;
-    }
-
-    public function setPendidikanTerakhir(?string $pendidikanTerakhir): self
-    {
-        $this->pendidikanTerakhir = $pendidikanTerakhir;
-        return $this;
-    }
-
-    public function getJurusanPendidikan(): ?string
-    {
-        return $this->jurusanPendidikan;
-    }
-
-    public function setJurusanPendidikan(?string $jurusanPendidikan): self
-    {
-        $this->jurusanPendidikan = $jurusanPendidikan;
-        return $this;
-    }
-
-    public function getFotoUrl(): ?string
-    {
-        return $this->fotoUrl;
-    }
-
-    public function setFotoUrl(?string $fotoUrl): self
-    {
-        $this->fotoUrl = $fotoUrl;
-        return $this;
-    }
-
-    public function isActive(): bool
-    {
-        return $this->isActive;
-    }
-
-    public function setIsActive(bool $isActive): self
-    {
-        $this->isActive = $isActive;
+        $this->tmtPendidik = $tmtPendidik;
         return $this;
     }
 
@@ -373,5 +163,36 @@ class Guru
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    // Helper proxy methods ke Pegawai
+    public function getNamaLengkap(): string
+    {
+        return $this->pegawai->getNamaLengkap();
+    }
+
+    public function getNamaDenganGelar(): string
+    {
+        return $this->pegawai->getNamaDenganGelar();
+    }
+
+    public function getNip(): ?string
+    {
+        return $this->pegawai->getNip();
+    }
+
+    public function getNuptk(): ?string
+    {
+        return $this->pegawai->getNuptk();
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->pegawai->getUser();
+    }
+
+    public function getJenisKelamin(): JenisKelamin
+    {
+        return $this->pegawai->getJenisKelamin();
     }
 }

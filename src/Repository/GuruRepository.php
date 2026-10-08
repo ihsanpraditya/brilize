@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Guru;
-use App\Enum\JenisKepegawaian;
 use App\Enum\StatusKepegawaian;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -39,59 +38,43 @@ class GuruRepository extends ServiceEntityRepository
     }
 
     /**
-     * Pencarian guru/PTK dengan eager loading relasi User
+     * Pencarian tenaga pendidik (guru) dengan eager loading data Pegawai dan User
      *
      * @return Guru[]
      */
     public function searchGuru(
         ?string $query = null,
         ?StatusKepegawaian $statusKepegawaian = null,
-        ?JenisKepegawaian $jenisKepegawaian = null,
+        ?bool $isSertifikasi = null,
         ?bool $isActive = null
     ): array {
         $qb = $this->createQueryBuilder('g')
-            ->leftJoin('g.user', 'u')
+            ->innerJoin('g.pegawai', 'p')
+            ->addSelect('p')
+            ->leftJoin('p.user', 'u')
             ->addSelect('u')
-            ->orderBy('g.namaLengkap', 'ASC');
+            ->orderBy('p.namaLengkap', 'ASC');
 
         if ($query) {
-            $qb->andWhere('LOWER(g.namaLengkap) LIKE :q OR g.nip LIKE :q OR g.nuptk LIKE :q OR g.nik LIKE :q OR LOWER(g.email) LIKE :q')
+            $qb->andWhere('LOWER(p.namaLengkap) LIKE :q OR p.nip LIKE :q OR p.nuptk LIKE :q OR LOWER(g.bidangStudiUtama) LIKE :q')
                ->setParameter('q', '%' . strtolower(trim($query)) . '%');
         }
 
         if ($statusKepegawaian !== null) {
-            $qb->andWhere('g.statusKepegawaian = :statusPegawai')
+            $qb->andWhere('p.statusKepegawaian = :statusPegawai')
                ->setParameter('statusPegawai', $statusKepegawaian);
         }
 
-        if ($jenisKepegawaian !== null) {
-            $qb->andWhere('g.jenisKepegawaian = :jenisPegawai')
-               ->setParameter('jenisPegawai', $jenisKepegawaian);
+        if ($isSertifikasi !== null) {
+            $qb->andWhere('g.isSertifikasi = :sertifikasi')
+               ->setParameter('sertifikasi', $isSertifikasi);
         }
 
         if ($isActive !== null) {
-            $qb->andWhere('g.isActive = :isActive')
+            $qb->andWhere('p.isActive = :isActive')
                ->setParameter('isActive', $isActive);
         }
 
         return $qb->getQuery()->getResult();
-    }
-
-    /**
-     * Mencari guru berdasarkan NIP atau NUPTK
-     */
-    public function findByIdentifier(string $identifier): ?Guru
-    {
-        $trimmed = trim($identifier);
-
-        return $this->createQueryBuilder('g')
-            ->leftJoin('g.user', 'u')
-            ->addSelect('u')
-            ->where('g.nip = :id')
-            ->orWhere('g.nuptk = :id')
-            ->orWhere('g.nik = :id')
-            ->setParameter('id', $trimmed)
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 }
