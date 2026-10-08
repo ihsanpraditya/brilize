@@ -16,10 +16,12 @@ final readonly class LoginDTO
 
     public static function fromRequest(Request $request): self
     {
+        $payload = $request->getPayload();
+
         return new self(
-            identifier: trim((string) $request->request->get('identifier', '')),
-            password: (string) $request->request->get('password', ''),
-            remember: (bool) $request->request->get('remember', false),
+            identifier: trim($payload->getString('identifier', (string) $request->request->get('identifier', ''))),
+            password: $payload->getString('password', (string) $request->request->get('password', '')),
+            remember: $payload->getBoolean('remember', (bool) $request->request->get('remember', false)),
         );
     }
 

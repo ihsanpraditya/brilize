@@ -84,13 +84,15 @@ final readonly class CreateSiswaDTO
 
     public static function fromRequest(Request $request): self
     {
+        $payload = $request->getPayload();
+
         return new self(
-            nis: trim((string) $request->request->get('nis', '')),
-            nisn: $request->request->get('nisn') ? trim((string) $request->request->get('nisn')) : null,
-            namaLengkap: trim((string) $request->request->get('nama_lengkap', '')),
-            jenisKelamin: (string) $request->request->get('jenis_kelamin', 'L'),
-            kelasId: $request->request->get('kelas_id') ? (int) $request->request->get('kelas_id') : null,
-            alamat: $request->request->get('alamat') ? trim((string) $request->request->get('alamat')) : null,
+            nis: trim($payload->getString('nis', (string) $request->request->get('nis', ''))),
+            nisn: $payload->has('nisn') && $payload->getString('nisn') !== '' ? trim($payload->getString('nisn')) : null,
+            namaLengkap: trim($payload->getString('nama_lengkap', (string) $request->request->get('nama_lengkap', ''))),
+            jenisKelamin: $payload->getString('jenis_kelamin', (string) $request->request->get('jenis_kelamin', 'L')),
+            kelasId: $payload->has('kelas_id') && $payload->get('kelas_id') ? (int) $payload->get('kelas_id') : null,
+            alamat: $payload->has('alamat') && $payload->getString('alamat') !== '' ? trim($payload->getString('alamat')) : null,
         );
     }
 }

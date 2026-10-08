@@ -26,21 +26,28 @@ final readonly class CreateUserDTO
 
     public static function fromRequest(Request $request): self
     {
-        $rawRoles = $request->request->all('roles');
+        $payload = $request->getPayload();
+
+        $rawRoles = $payload->all('roles') ?: $request->request->all('roles');
         $roles = !empty($rawRoles) ? (array) $rawRoles : [UserRole::SISWA->value];
 
-        $rawStatus = (string) $request->request->get('status', UserStatus::ACTIVE->value);
+        $rawStatus = $payload->getString('status', (string) $request->request->get('status', UserStatus::ACTIVE->value));
         $status = UserStatus::tryFrom($rawStatus) ?? UserStatus::ACTIVE;
 
+        $email = $payload->getString('email', (string) $request->request->get('email', ''));
+        $username = $payload->getString('username', (string) $request->request->get('username', ''));
+        $identifierNumber = $payload->getString('identifier_number', (string) $request->request->get('identifier_number', ''));
+        $phone = $payload->getString('phone', (string) $request->request->get('phone', ''));
+
         return new self(
-            name: trim((string) $request->request->get('name', '')),
-            email: $request->request->get('email') ? trim((string) $request->request->get('email')) : null,
-            username: $request->request->get('username') ? trim((string) $request->request->get('username')) : null,
-            identifierNumber: $request->request->get('identifier_number') ? trim((string) $request->request->get('identifier_number')) : null,
-            password: (string) $request->request->get('password', ''),
+            name: trim($payload->getString('name', (string) $request->request->get('name', ''))),
+            email: $email !== '' ? trim($email) : null,
+            username: $username !== '' ? trim($username) : null,
+            identifierNumber: $identifierNumber !== '' ? trim($identifierNumber) : null,
+            password: $payload->getString('password', (string) $request->request->get('password', '')),
             roles: array_values(array_filter(array_map('strval', $roles))),
             status: $status,
-            phone: $request->request->get('phone') ? trim((string) $request->request->get('phone')) : null,
+            phone: $phone !== '' ? trim($phone) : null,
         );
     }
 

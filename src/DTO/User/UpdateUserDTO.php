@@ -26,24 +26,33 @@ final readonly class UpdateUserDTO
 
     public static function fromRequest(Request $request): self
     {
-        $rawRoles = $request->request->all('roles');
-        $roles = !empty($rawRoles) ? array_values(array_filter(array_map('strval', (array) $rawRoles))) : null;
+        $payload = $request->getPayload();
 
-        $rawStatus = $request->request->get('status');
-        $status = $rawStatus ? UserStatus::tryFrom((string) $rawStatus) : null;
+        $rawRoles = $payload->has('roles') ? $payload->all('roles') : ($request->request->has('roles') ? $request->request->all('roles') : null);
+        $roles = $rawRoles !== null ? array_values(array_filter(array_map('strval', (array) $rawRoles))) : null;
 
-        $password = $request->request->get('password') ? (string) $request->request->get('password') : null;
+        $rawStatus = $payload->has('status') ? $payload->getString('status') : ($request->request->has('status') ? (string) $request->request->get('status') : null);
+        $status = $rawStatus ? UserStatus::tryFrom($rawStatus) : null;
+
+        $password = $payload->has('password') ? $payload->getString('password') : ($request->request->has('password') ? (string) $request->request->get('password') : null);
+
+        $name = $payload->getString('name', (string) $request->request->get('name', ''));
+        $email = $payload->has('email') ? $payload->getString('email') : ($request->request->has('email') ? (string) $request->request->get('email') : null);
+        $username = $payload->has('username') ? $payload->getString('username') : ($request->request->has('username') ? (string) $request->request->get('username') : null);
+        $identifierNumber = $payload->has('identifier_number') ? $payload->getString('identifier_number') : ($request->request->has('identifier_number') ? (string) $request->request->get('identifier_number') : null);
+        $phone = $payload->has('phone') ? $payload->getString('phone') : ($request->request->has('phone') ? (string) $request->request->get('phone') : null);
+        $avatarUrl = $payload->has('avatar_url') ? $payload->getString('avatar_url') : ($request->request->has('avatar_url') ? (string) $request->request->get('avatar_url') : null);
 
         return new self(
-            name: trim((string) $request->request->get('name', '')),
-            email: $request->request->get('email') ? trim((string) $request->request->get('email')) : null,
-            username: $request->request->get('username') ? trim((string) $request->request->get('username')) : null,
-            identifierNumber: $request->request->get('identifier_number') ? trim((string) $request->request->get('identifier_number')) : null,
-            password: $password !== '' ? $password : null,
+            name: trim($name),
+            email: $email !== null && $email !== '' ? trim($email) : null,
+            username: $username !== null && $username !== '' ? trim($username) : null,
+            identifierNumber: $identifierNumber !== null && $identifierNumber !== '' ? trim($identifierNumber) : null,
+            password: $password !== null && $password !== '' ? $password : null,
             roles: $roles,
             status: $status,
-            phone: $request->request->get('phone') ? trim((string) $request->request->get('phone')) : null,
-            avatarUrl: $request->request->get('avatar_url') ? trim((string) $request->request->get('avatar_url')) : null,
+            phone: $phone !== null && $phone !== '' ? trim($phone) : null,
+            avatarUrl: $avatarUrl !== null && $avatarUrl !== '' ? trim($avatarUrl) : null,
         );
     }
 }
