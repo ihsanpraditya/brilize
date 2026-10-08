@@ -1,9 +1,38 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const page = usePage()
 const user = computed(() => (page.props.auth as any)?.user)
+
+const isDark = ref(false)
+
+onMounted(() => {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme')
+  if (currentTheme === 'dark' || (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    isDark.value = true
+    applyTheme('dark')
+  } else {
+    isDark.value = false
+    applyTheme('light')
+  }
+})
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  const theme = isDark.value ? 'dark' : 'light'
+  applyTheme(theme)
+}
+
+function applyTheme(theme: 'light' | 'dark') {
+  document.documentElement.setAttribute('data-theme', theme)
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+  localStorage.setItem('theme', theme)
+}
 </script>
 
 <template>
@@ -30,9 +59,49 @@ const user = computed(() => (page.props.auth as any)?.user)
       </div>
     </div>
 
-    <!-- Right Action Items (Notifikasi & Profil) -->
-    <div class="flex-none items-center gap-3">
+    <!-- Right Action Items (Dark Mode, Notifikasi & Profil) -->
+    <div class="flex-none items-center gap-2 sm:gap-3">
       
+      <!-- Dark Mode Switch Button -->
+      <button
+        @click="toggleTheme"
+        type="button"
+        class="btn btn-ghost btn-circle btn-sm"
+        :aria-label="isDark ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'"
+        :title="isDark ? 'Mode Terang' : 'Mode Gelap'"
+      >
+        <!-- Sun icon (shown when dark) -->
+        <svg
+          v-if="isDark"
+          class="w-5 h-5 text-amber-400 transition-transform duration-300 rotate-0 hover:rotate-45"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+          />
+        </svg>
+        <!-- Moon icon (shown when light) -->
+        <svg
+          v-else
+          class="w-5 h-5 opacity-70 transition-transform duration-300 hover:-rotate-12"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+          />
+        </svg>
+      </button>
+
       <!-- Notifikasi Dropdown -->
       <div class="dropdown dropdown-end">
         <button tabindex="0" class="btn btn-ghost btn-circle btn-sm" aria-label="Notifikasi">
@@ -90,7 +159,7 @@ const user = computed(() => (page.props.auth as any)?.user)
           <li>
             <Link href="/logout" method="post" as="button" class="text-error font-medium hover:bg-error/10">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"></path>
               </svg>
               Keluar (Logout)
             </Link>
