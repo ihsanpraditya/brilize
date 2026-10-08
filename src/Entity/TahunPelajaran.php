@@ -18,7 +18,7 @@ class TahunPelajaran
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(type: Types::BIGINT)]
+    #[ORM\Column(type: Types::SMALLINT)]
     private ?int $id = null;
 
     /**
