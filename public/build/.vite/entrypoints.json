@@ -1,13 +1,13 @@
 {
-  "base": "/brilize/build/",
+  "base": "/build/",
   "entryPoints": {
     "app": {
       "css": [
-        "/brilize/build/assets/app-Ba5UItIa.css"
+        "/build/assets/app-Ba5UItIa.css"
       ],
       "dynamic": [],
       "js": [
-        "/brilize/build/assets/app-C5ALSoaR.js"
+        "/build/assets/app-C5ALSoaR.js"
       ],
       "legacy": false,
       "preload": []

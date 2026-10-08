@@ -4,7 +4,7 @@ import symfonyPlugin from 'vite-plugin-symfony';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  base: '/brilize/build/',
+  // base: '/brilize/build/',
   plugins: [
     vue(),
     symfonyPlugin(),
