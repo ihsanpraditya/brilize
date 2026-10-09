@@ -498,76 +498,77 @@ function deleteSiswa(item: SiswaItem) {
           <!-- TAB 1: BIODATA SISWA -->
           <div v-show="activeTab === 'biodata'" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs font-semibold">NIS (Lokal) <span class="text-error">*</span></span></label>
-                <input v-model="form.nis" type="text" placeholder="Contoh: 20261001" class="input input-bordered input-sm" required />
-                <span v-if="form.errors.nis" class="text-error text-xs mt-1">{{ form.errors.nis }}</span>
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">NIS (Lokal) <span class="text-error">*</span></label>
+                <input v-model="form.nis" type="text" placeholder="Contoh: 20261001" class="input input-bordered input-sm w-full" :class="{ 'input-error': form.errors.nis }" required />
+                <span v-if="form.errors.nis" class="text-error text-xs mt-1 block">{{ form.errors.nis }}</span>
               </div>
 
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">NISN (Dapodik)</span></label>
-                <input v-model="form.nisn" type="text" placeholder="10 Digit NISN" class="input input-bordered input-sm" />
-                <span v-if="form.errors.nisn" class="text-error text-xs mt-1">{{ form.errors.nisn }}</span>
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">NISN (Dapodik)</label>
+                <input v-model="form.nisn" type="text" placeholder="10 Digit NISN" class="input input-bordered input-sm w-full" :class="{ 'input-error': form.errors.nisn }" />
+                <span v-if="form.errors.nisn" class="text-error text-xs mt-1 block">{{ form.errors.nisn }}</span>
               </div>
 
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">NIK (KTP / KK)</span></label>
-                <input v-model="form.nik" type="text" placeholder="16 Digit NIK" class="input input-bordered input-sm" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="form-control md:col-span-2">
-                <label class="label py-1"><span class="label-text text-xs font-semibold">Nama Lengkap <span class="text-error">*</span></span></label>
-                <input v-model="form.nama_lengkap" type="text" placeholder="Nama lengkap sesuai akta lahir" class="input input-bordered input-sm" required />
-                <span v-if="form.errors.nama_lengkap" class="text-error text-xs mt-1">{{ form.errors.nama_lengkap }}</span>
-              </div>
-
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Nama Panggilan</span></label>
-                <input v-model="form.nama_panggilan" type="text" placeholder="Nama panggilan" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">NIK (KTP / KK)</label>
+                <input v-model="form.nik" type="text" placeholder="16 Digit NIK" class="input input-bordered input-sm w-full" :class="{ 'input-error': form.errors.nik }" />
+                <span v-if="form.errors.nik" class="text-error text-xs mt-1 block">{{ form.errors.nik }}</span>
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Nama Arab (Pesantren/Madrasah)</span></label>
-                <input v-model="form.nama_arab" type="text" placeholder="contoh: محمّد علي" class="input input-bordered input-sm font-serif" dir="rtl" />
+              <div class="space-y-1 w-full md:col-span-2">
+                <label class="block text-xs font-semibold text-base-content/80">Nama Lengkap <span class="text-error">*</span></label>
+                <input v-model="form.nama_lengkap" type="text" placeholder="Nama lengkap sesuai akta lahir" class="input input-bordered input-sm w-full" :class="{ 'input-error': form.errors.nama_lengkap }" required />
+                <span v-if="form.errors.nama_lengkap" class="text-error text-xs mt-1 block">{{ form.errors.nama_lengkap }}</span>
               </div>
 
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs font-semibold">Jenis Kelamin</span></label>
-                <select v-model="form.jenis_kelamin" class="select select-bordered select-sm">
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Nama Panggilan</label>
+                <input v-model="form.nama_panggilan" type="text" placeholder="Nama panggilan" class="input input-bordered input-sm w-full" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Nama Arab (Pesantren/Madrasah)</label>
+                <input v-model="form.nama_arab" type="text" placeholder="contoh: محمّد علي" class="input input-bordered input-sm w-full font-serif text-right" dir="rtl" />
+              </div>
+
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Jenis Kelamin <span class="text-error">*</span></label>
+                <select v-model="form.jenis_kelamin" class="select select-bordered select-sm w-full">
                   <option v-for="jk in props.options.jenisKelamin" :key="jk.value" :value="jk.value">
                     {{ jk.label }}
                   </option>
                 </select>
               </div>
 
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Agama</span></label>
-                <select v-model="form.agama" class="select select-bordered select-sm">
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Agama</label>
+                <select v-model="form.agama" class="select select-bordered select-sm w-full">
                   <option v-for="ag in props.options.agama" :key="ag" :value="ag">{{ ag }}</option>
                 </select>
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Tempat Lahir</span></label>
-                <input v-model="form.tempat_lahir" type="text" placeholder="Kota / Kabupaten Lahir" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Tempat Lahir</label>
+                <input v-model="form.tempat_lahir" type="text" placeholder="Kota / Kabupaten Lahir" class="input input-bordered input-sm w-full" />
               </div>
 
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Tanggal Lahir</span></label>
-                <input v-model="form.tanggal_lahir" type="date" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Tanggal Lahir</label>
+                <input v-model="form.tanggal_lahir" type="date" class="input input-bordered input-sm w-full" />
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Kelas / Rombel</span></label>
-                <select v-model="form.kelas_id" class="select select-bordered select-sm">
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Kelas / Rombel</label>
+                <select v-model="form.kelas_id" class="select select-bordered select-sm w-full">
                   <option value="">Pilih Kelas</option>
                   <option v-for="k in props.options.kelas" :key="k.id" :value="k.id">
                     {{ k.namaKelas }} (Tingkat {{ k.tingkat }})
@@ -575,9 +576,9 @@ function deleteSiswa(item: SiswaItem) {
                 </select>
               </div>
 
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs font-semibold">Status Kesiswaan</span></label>
-                <select v-model="form.status" class="select select-bordered select-sm">
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Status Kesiswaan <span class="text-error">*</span></label>
+                <select v-model="form.status" class="select select-bordered select-sm w-full">
                   <option v-for="st in props.options.statusSiswa" :key="st.value" :value="st.value">
                     {{ st.label }}
                   </option>
@@ -585,148 +586,161 @@ function deleteSiswa(item: SiswaItem) {
               </div>
             </div>
 
-            <div class="form-control">
-              <label class="label py-1"><span class="label-text text-xs">Alamat Tinggal</span></label>
-              <textarea v-model="form.alamat" rows="2" placeholder="Jalan, Gang, Dusun..." class="textarea textarea-bordered textarea-sm"></textarea>
+            <div class="space-y-1 w-full">
+              <label class="block text-xs font-semibold text-base-content/80">Alamat Tinggal</label>
+              <textarea v-model="form.alamat" rows="2" placeholder="Jalan, Gang, Dusun..." class="textarea textarea-bordered textarea-sm w-full"></textarea>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">RT / RW</span></label>
-                <div class="flex gap-1">
-                  <input v-model="form.rt" type="text" placeholder="RT" class="input input-bordered input-sm w-1/2" />
-                  <input v-model="form.rw" type="text" placeholder="RW" class="input input-bordered input-sm w-1/2" />
-                </div>
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">RT</label>
+                <input v-model="form.rt" type="text" placeholder="001" class="input input-bordered input-sm w-full" />
               </div>
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Kelurahan / Desa</span></label>
-                <input v-model="form.kelurahan" type="text" placeholder="Kelurahan" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">RW</label>
+                <input v-model="form.rw" type="text" placeholder="002" class="input input-bordered input-sm w-full" />
               </div>
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Kecamatan</span></label>
-                <input v-model="form.kecamatan" type="text" placeholder="Kecamatan" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Kelurahan / Desa</label>
+                <input v-model="form.kelurahan" type="text" placeholder="Kelurahan" class="input input-bordered input-sm w-full" />
               </div>
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Kabupaten / Kota</span></label>
-                <input v-model="form.kabupaten_kota" type="text" placeholder="Kota" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Kecamatan</label>
+                <input v-model="form.kecamatan" type="text" placeholder="Kecamatan" class="input input-bordered input-sm w-full" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Kabupaten / Kota</label>
+                <input v-model="form.kabupaten_kota" type="text" placeholder="Kab/Kota" class="input input-bordered input-sm w-full" />
+              </div>
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Provinsi</label>
+                <input v-model="form.provinsi" type="text" placeholder="Provinsi" class="input input-bordered input-sm w-full" />
+              </div>
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Kode Pos</label>
+                <input v-model="form.kode_pos" type="text" placeholder="Kode Pos" class="input input-bordered input-sm w-full" />
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">No. HP Siswa</span></label>
-                <input v-model="form.nomor_hp" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">No. HP Siswa</label>
+                <input v-model="form.nomor_hp" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm w-full" />
               </div>
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Email Siswa</span></label>
-                <input v-model="form.email" type="email" placeholder="siswa@sekolah.sch.id" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Email Siswa</label>
+                <input v-model="form.email" type="email" placeholder="siswa@sekolah.sch.id" class="input input-bordered input-sm w-full" :class="{ 'input-error': form.errors.email }" />
+                <span v-if="form.errors.email" class="text-error text-xs mt-1 block">{{ form.errors.email }}</span>
               </div>
             </div>
           </div>
 
           <!-- TAB 2: DATA ORANG TUA & WALI -->
           <div v-show="activeTab === 'ortu'" class="space-y-4">
-            <div class="p-3 bg-base-200/50 rounded-box space-y-3">
+            <div class="p-4 bg-base-200/50 rounded-box border border-base-300/60 space-y-3">
               <h4 class="font-bold text-xs uppercase tracking-wider text-primary">Data Ayah Kandung</h4>
               <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div class="form-control md:col-span-2">
-                  <label class="label py-1"><span class="label-text text-xs">Nama Ayah</span></label>
-                  <input v-model="form.nama_ayah" type="text" placeholder="Nama lengkap ayah" class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full md:col-span-2">
+                  <label class="block text-xs font-semibold text-base-content/80">Nama Ayah</label>
+                  <input v-model="form.nama_ayah" type="text" placeholder="Nama lengkap ayah" class="input input-bordered input-sm w-full" />
                 </div>
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">Pekerjaan Ayah</span></label>
-                  <input v-model="form.pekerjaan_ayah" type="text" placeholder="PNS, Wiraswasta, Petani..." class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">Pekerjaan Ayah</label>
+                  <input v-model="form.pekerjaan_ayah" type="text" placeholder="PNS, Wiraswasta, dll" class="input input-bordered input-sm w-full" />
                 </div>
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">No. HP Ayah</span></label>
-                  <input v-model="form.no_hp_ayah" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">No. HP Ayah</label>
+                  <input v-model="form.no_hp_ayah" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm w-full" />
                 </div>
               </div>
             </div>
 
-            <div class="p-3 bg-base-200/50 rounded-box space-y-3">
+            <div class="p-4 bg-base-200/50 rounded-box border border-base-300/60 space-y-3">
               <h4 class="font-bold text-xs uppercase tracking-wider text-secondary">Data Ibu Kandung</h4>
               <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div class="form-control md:col-span-2">
-                  <label class="label py-1"><span class="label-text text-xs">Nama Ibu</span></label>
-                  <input v-model="form.nama_ibu" type="text" placeholder="Nama lengkap ibu" class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full md:col-span-2">
+                  <label class="block text-xs font-semibold text-base-content/80">Nama Ibu</label>
+                  <input v-model="form.nama_ibu" type="text" placeholder="Nama lengkap ibu" class="input input-bordered input-sm w-full" />
                 </div>
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">Pekerjaan Ibu</span></label>
-                  <input v-model="form.pekerjaan_ibu" type="text" placeholder="IRT, Guru, Pedagang..." class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">Pekerjaan Ibu</label>
+                  <input v-model="form.pekerjaan_ibu" type="text" placeholder="IRT, Guru, Pedagang..." class="input input-bordered input-sm w-full" />
                 </div>
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">No. HP Ibu</span></label>
-                  <input v-model="form.no_hp_ibu" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">No. HP Ibu</label>
+                  <input v-model="form.no_hp_ibu" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm w-full" />
                 </div>
               </div>
             </div>
 
-            <div class="p-3 bg-base-200/50 rounded-box space-y-3">
+            <div class="p-4 bg-base-200/50 rounded-box border border-base-300/60 space-y-3">
               <h4 class="font-bold text-xs uppercase tracking-wider text-base-content/80">Data Wali (Opsional)</h4>
               <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">Nama Wali</span></label>
-                  <input v-model="form.nama_wali" type="text" placeholder="Nama wali" class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">Nama Wali</label>
+                  <input v-model="form.nama_wali" type="text" placeholder="Nama wali" class="input input-bordered input-sm w-full" />
                 </div>
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">Hubungan Wali</span></label>
-                  <input v-model="form.hubungan_wali" type="text" placeholder="Kakek, Paman, Kakak..." class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">Hubungan Wali</label>
+                  <input v-model="form.hubungan_wali" type="text" placeholder="Kakek, Paman, dll" class="input input-bordered input-sm w-full" />
                 </div>
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">Pekerjaan Wali</span></label>
-                  <input v-model="form.pekerjaan_wali" type="text" placeholder="Pekerjaan wali" class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">Pekerjaan Wali</label>
+                  <input v-model="form.pekerjaan_wali" type="text" placeholder="Pekerjaan wali" class="input input-bordered input-sm w-full" />
                 </div>
-                <div class="form-control">
-                  <label class="label py-1"><span class="label-text text-xs">No. HP Wali</span></label>
-                  <input v-model="form.no_hp_wali" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm" />
+                <div class="space-y-1 w-full">
+                  <label class="block text-xs font-semibold text-base-content/80">No. HP Wali</label>
+                  <input v-model="form.no_hp_wali" type="text" placeholder="08xxxxxxxxxx" class="input input-bordered input-sm w-full" />
                 </div>
               </div>
             </div>
 
-            <div class="form-control">
-              <label class="label py-1"><span class="label-text text-xs">Alamat Orang Tua / Wali</span></label>
-              <textarea v-model="form.alamat_orang_tua" rows="2" placeholder="Alamat domisili orang tua jika berbeda" class="textarea textarea-bordered textarea-sm"></textarea>
+            <div class="space-y-1 w-full">
+              <label class="block text-xs font-semibold text-base-content/80">Alamat Orang Tua / Wali</label>
+              <textarea v-model="form.alamat_orang_tua" rows="2" placeholder="Alamat domisili orang tua jika berbeda" class="textarea textarea-bordered textarea-sm w-full"></textarea>
             </div>
           </div>
 
           <!-- TAB 3: DATA TAMBAHAN & AKUN PORTAL -->
           <div v-show="activeTab === 'lainnya'" class="space-y-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Anak Ke-</span></label>
-                <input v-model="form.anak_ke" type="number" min="1" placeholder="1" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Anak Ke-</label>
+                <input v-model="form.anak_ke" type="number" min="1" placeholder="1" class="input input-bordered input-sm w-full" />
               </div>
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Jumlah Saudara</span></label>
-                <input v-model="form.jumlah_saudara" type="number" min="0" placeholder="0" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Jumlah Saudara</label>
+                <input v-model="form.jumlah_saudara" type="number" min="0" placeholder="0" class="input input-bordered input-sm w-full" />
               </div>
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Tanggal Masuk</span></label>
-                <input v-model="form.tanggal_masuk" type="date" class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Tanggal Masuk</label>
+                <input v-model="form.tanggal_masuk" type="date" class="input input-bordered input-sm w-full" />
               </div>
-              <div class="form-control">
-                <label class="label py-1"><span class="label-text text-xs">Asal Sekolah</span></label>
-                <input v-model="form.asal_sekolah" type="text" placeholder="SMPN 1 / MTs..." class="input input-bordered input-sm" />
+              <div class="space-y-1 w-full">
+                <label class="block text-xs font-semibold text-base-content/80">Asal Sekolah</label>
+                <input v-model="form.asal_sekolah" type="text" placeholder="SMPN 1 / MTs..." class="input input-bordered input-sm w-full" />
               </div>
             </div>
 
-            <div class="form-control">
-              <label class="label py-1"><span class="label-text text-xs">Foto Profil URL</span></label>
-              <input v-model="form.foto_url" type="text" placeholder="https://..." class="input input-bordered input-sm" />
+            <div class="space-y-1 w-full">
+              <label class="block text-xs font-semibold text-base-content/80">Foto Profil URL</label>
+              <input v-model="form.foto_url" type="text" placeholder="https://..." class="input input-bordered input-sm w-full" />
             </div>
 
-            <div class="form-control">
-              <label class="label py-1"><span class="label-text text-xs">Catatan Tambahan / BK</span></label>
-              <textarea v-model="form.catatan" rows="2" placeholder="Prestasi, catatan khusus, beasiswa..." class="textarea textarea-bordered textarea-sm"></textarea>
+            <div class="space-y-1 w-full">
+              <label class="block text-xs font-semibold text-base-content/80">Catatan Tambahan / BK</label>
+              <textarea v-model="form.catatan" rows="2" placeholder="Prestasi, catatan khusus, beasiswa..." class="textarea textarea-bordered textarea-sm w-full"></textarea>
             </div>
 
-            <div v-if="modalMode === 'create'" class="p-3 bg-primary/10 rounded-box border border-primary/20 space-y-2">
-              <label class="cursor-pointer label justify-start gap-3">
-                <input v-model="form.create_user_account" type="checkbox" class="checkbox checkbox-primary checkbox-sm" />
-                <div>
+            <div v-if="modalMode === 'create'" class="p-3 bg-primary/10 rounded-box border border-primary/20">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <input v-model="form.create_user_account" type="checkbox" class="checkbox checkbox-primary checkbox-sm mt-0.5" />
+                <div class="space-y-0.5">
                   <div class="font-bold text-xs text-primary">Buat Akun Portal Siswa Otomatis</div>
-                  <div class="text-xs opacity-70">Sistem akan membuat akun User login dengan Username & Password default menggunakan NIS.</div>
+                  <div class="text-xs text-base-content/70">Sistem akan membuat akun User login dengan Username & Password default menggunakan NIS.</div>
                 </div>
               </label>
             </div>
