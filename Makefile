@@ -7,11 +7,22 @@ DB_PASSWORD=!ChangeMe!
 DB_NAME=app
 DB_EXPORT_FILE=database_migration.sql
 
+help:
+	@echo "=================================================="
+	@echo "  PERINTAH MAKEFILE DEPLOYMENT SYMFONY"
+	@echo "=================================================="
+	@echo "  make build      - Build frontend assets & production dependencies"
+	@echo "  make db-export  - Export database PostgreSQL dari Docker"
+	@echo "  make zip-deploy - Jalankan build, export DB, dan buat deploy.zip"
+	@echo "  make clean      - Bersihkan file dump SQL & kembalikan composer dev"
+	@echo "  make help       - Menampilkan panduan bantuan ini"
+	@echo "=================================================="
+
 build:
 	@echo "Building frontend assets..."
 	bun run build
 	@echo "Installing production vendor dependencies..."
-	composer install --no-dev --optimize-autoloader --no-interaction
+	composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 	@echo "Build complete!"
 
 db-export:
