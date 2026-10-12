@@ -19,8 +19,6 @@ use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
 final readonly class SiswaService
 {
     public function __construct(
@@ -28,7 +26,6 @@ final readonly class SiswaService
         private KelasRepository $kelasRepository,
         private UserRepository $userRepository,
         private EntityManagerInterface $em,
-        private ?UserPasswordHasherInterface $passwordHasher = null,
     ) {}
 
     /**
@@ -145,13 +142,9 @@ final readonly class SiswaService
             $user->setRoles([UserRole::SISWA->value]);
             $user->setStatus(UserStatus::ACTIVE);
 
-            // Default password: NIS
+            // Default password login: NIS siswa
             $plainPassword = $dto->nis;
-            if ($this->passwordHasher !== null) {
-                $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
-            } else {
-                $user->setPassword(password_hash($plainPassword, PASSWORD_BCRYPT));
-            }
+            $user->setPassword(password_hash($plainPassword, PASSWORD_BCRYPT));
 
             $this->em->persist($user);
             $siswa->setUser($user);
