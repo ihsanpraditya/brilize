@@ -121,6 +121,7 @@ class UserFixtures extends Fixture
             $user->setPhone($data['phone']);
 
             $manager->persist($user);
+            $this->addReference('user_' . $data['username'], $user);
         }
 
         $manager->flush();
