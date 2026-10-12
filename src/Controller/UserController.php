@@ -6,6 +6,8 @@ namespace App\Controller;
 
 use App\DTO\User\CreateUserDTO;
 use App\DTO\User\UpdateUserDTO;
+use App\Enum\UserRole;
+use App\Enum\UserStatus;
 use App\Service\UserService;
 use Nytodev\InertiaBundle\Service\Inertia;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,12 +23,27 @@ final class UserController extends AbstractController
     public function index(Request $request, UserService $userService, Inertia $inertia): Response
     {
         $query = $request->query->get('q');
-        $users = $userService->getAllUsers($query !== null ? (string) $query : null);
+        $statusParam = $request->query->get('status');
+        $status = $statusParam ? UserStatus::tryFrom((string) $statusParam) : null;
+
+        $users = $userService->getAllUsers($query !== null ? (string) $query : null, $status);
 
         return $inertia->render('Users/Index', [
             'users' => array_map(fn($u) => $u->toArray(), $users),
             'filters' => [
                 'q' => $query,
+                'status' => $statusParam,
+            ],
+            'options' => [
+                'roles' => array_map(fn(UserRole $r) => [
+                    'value' => $r->value,
+                    'label' => $r->label(),
+                ], UserRole::cases()),
+                'statuses' => array_map(fn(UserStatus $s) => [
+                    'value' => $s->value,
+                    'label' => $s->label(),
+                    'badge' => $s->badgeClass(),
+                ], UserStatus::cases()),
             ],
         ]);
     }

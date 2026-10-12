@@ -55,38 +55,38 @@ const navigationSections: NavSection[] = [
         href: '/akademik/kelas',
         icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
       },
-      {
-        label: 'Jadwal Pelajaran',
-        href: '/akademik/jadwal',
-        icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-      },
-      {
-        label: 'Presensi Harian',
-        href: '/akademik/presensi',
-        icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
-      },
-      {
-        label: 'Penilaian & Rapor',
-        href: '/akademik/nilai',
-        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-      },
+      // {
+      //   label: 'Jadwal Pelajaran',
+      //   href: '/akademik/jadwal',
+      //   icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+      // },
+      // {
+      //   label: 'Presensi Harian',
+      //   href: '/akademik/presensi',
+      //   icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+      // },
+      // {
+      //   label: 'Penilaian & Rapor',
+      //   href: '/akademik/nilai',
+      //   icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+      // },
     ],
   },
-  {
-    title: 'KEUANGAN (SPP)',
-    items: [
-      {
-        label: 'Tagihan SPP',
-        href: '/keuangan/tagihan',
-        icon: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z',
-      },
-      {
-        label: 'Kasir & Pembayaran',
-        href: '/keuangan/transaksi',
-        icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z',
-      },
-    ],
-  },
+  // {
+  //   title: 'KEUANGAN (SPP)',
+  //   items: [
+  //     {
+  //       label: 'Tagihan SPP',
+  //       href: '/keuangan/tagihan',
+  //       icon: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z',
+  //     },
+  //     {
+  //       label: 'Kasir & Pembayaran',
+  //       href: '/keuangan/transaksi',
+  //       icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z',
+  //     },
+  //   ],
+  // },
   {
     title: 'PENGATURAN',
     items: [
@@ -120,9 +120,9 @@ function hasPermission(roles?: string[]): boolean {
 <template>
   <aside class="drawer-side z-40">
     <label for="erp-drawer" aria-label="Tutup Sidebar" class="drawer-overlay"></label>
-    
+
     <div class="menu p-4 w-72 min-h-full bg-base-100 text-base-content border-r border-base-300 flex flex-col justify-between">
-      
+
       <div>
         <!-- Logo Brand -->
         <div class="px-2 py-4 mb-4 flex items-center gap-3">

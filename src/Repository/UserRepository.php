@@ -77,7 +77,7 @@ class UserRepository extends ServiceEntityRepository
             ->orderBy('u.createdAt', 'DESC');
 
         if ($query) {
-            $qb->andWhere('LOWER(u.name) LIKE :q OR LOWER(u.email) LIKE :q OR u.identifierNumber LIKE :q')
+            $qb->andWhere('LOWER(u.name) LIKE :q OR LOWER(u.email) LIKE :q OR LOWER(u.username) LIKE :q OR u.identifierNumber LIKE :q')
                ->setParameter('q', '%' . strtolower(trim($query)) . '%');
         }
 
