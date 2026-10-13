@@ -61,6 +61,129 @@ final class SiswaController extends AbstractController
         ]);
     }
 
+    #[Route('/export', name: 'export', methods: ['GET'])]
+    public function export(Request $request, SiswaService $service): Response
+    {
+        $scope = $request->query->get('scope', 'filtered'); // 'filtered' | 'all'
+        $format = $request->query->get('format', 'json'); // 'json' | 'csv'
+        $type = $request->query->get('type', 'ringkas'); // 'ringkas' | 'lengkap'
+
+        if ($scope === 'all') {
+            $list = $service->getAllSiswa();
+        } else {
+            $query = $request->query->get('q');
+            $kelasId = $request->query->get('kelas_id') ? (int) $request->query->get('kelas_id') : null;
+            $statusStr = $request->query->get('status');
+            $status = $statusStr ? StatusSiswa::tryFrom((string) $statusStr) : null;
+            $jkStr = $request->query->get('jenis_kelamin');
+            $jenisKelamin = $jkStr ? JenisKelamin::tryFrom((string) $jkStr) : null;
+            $isActive = $request->query->has('is_active') && $request->query->get('is_active') !== ''
+                ? filter_var($request->query->get('is_active'), FILTER_VALIDATE_BOOLEAN)
+                : null;
+
+            $list = $service->getAllSiswa(
+                $query !== null ? (string) $query : null,
+                $kelasId,
+                $status,
+                $jenisKelamin,
+                $isActive
+            );
+        }
+
+        $data = array_map(fn($item) => $item->toArray(), $list);
+
+        if ($format === 'json') {
+            return $this->json($data);
+        }
+
+        // Generate CSV dengan UTF-8 BOM agar terbaca sempurna di Microsoft Excel
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => sprintf('attachment; filename="Export_Siswa_%s_%s.csv"', $type, date('Ymd_His')),
+        ];
+
+        $output = fopen('php://temp', 'r+');
+        fputs($output, "\xEF\xBB\xBF");
+
+        if ($type === 'lengkap') {
+            fputcsv($output, [
+                'No', 'NIS', 'NISN', 'NIK', 'Nama Lengkap', 'Nama Panggilan', 'Nama Arab',
+                'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Kelas', 'Status',
+                'Alamat', 'RT', 'RW', 'Kelurahan', 'Kecamatan', 'Kab/Kota', 'Provinsi', 'Kode Pos',
+                'No. HP Siswa', 'Email Siswa', 'Nama Ayah', 'Pekerjaan Ayah', 'No. HP Ayah',
+                'Nama Ibu', 'Pekerjaan Ibu', 'No. HP Ibu', 'Nama Wali', 'Hubungan Wali', 'No. HP Wali',
+                'Anak Ke', 'Jumlah Saudara', 'Tanggal Masuk', 'Asal Sekolah', 'Catatan'
+            ], ';');
+
+            foreach ($data as $idx => $s) {
+                fputcsv($output, [
+                    $idx + 1,
+                    $s['nis'],
+                    $s['nisn'] ?? '',
+                    $s['nik'] ?? '',
+                    $s['namaLengkap'],
+                    $s['namaPanggilan'] ?? '',
+                    $s['namaArab'] ?? '',
+                    $s['jenisKelaminLabel'] ?? $s['jenisKelamin'],
+                    $s['tempatLahir'] ?? '',
+                    $s['tanggalLahir'] ?? '',
+                    $s['agama'] ?? '',
+                    $s['kelasNama'] ?? '',
+                    $s['statusLabel'] ?? $s['status'],
+                    $s['alamat'] ?? '',
+                    $s['rt'] ?? '',
+                    $s['rw'] ?? '',
+                    $s['kelurahan'] ?? '',
+                    $s['kecamatan'] ?? '',
+                    $s['kabupatenKota'] ?? '',
+                    $s['provinsi'] ?? '',
+                    $s['kodePos'] ?? '',
+                    $s['nomorHp'] ?? '',
+                    $s['email'] ?? '',
+                    $s['namaAyah'] ?? '',
+                    $s['pekerjaanAyah'] ?? '',
+                    $s['noHpAyah'] ?? '',
+                    $s['namaIbu'] ?? '',
+                    $s['pekerjaanIbu'] ?? '',
+                    $s['noHpIbu'] ?? '',
+                    $s['namaWali'] ?? '',
+                    $s['hubunganWali'] ?? '',
+                    $s['noHpWali'] ?? '',
+                    $s['anakKe'] ?? '',
+                    $s['jumlahSaudara'] ?? '',
+                    $s['tanggalMasuk'] ?? '',
+                    $s['asalSekolah'] ?? '',
+                    $s['catatan'] ?? '',
+                ], ';');
+            }
+        } else {
+            fputcsv($output, [
+                'No', 'NIS', 'NISN', 'Nama Lengkap', 'Jenis Kelamin', 'Kelas', 'Status', 'No. HP Siswa', 'Nama Orang Tua', 'No. HP Orang Tua'
+            ], ';');
+
+            foreach ($data as $idx => $s) {
+                fputcsv($output, [
+                    $idx + 1,
+                    $s['nis'],
+                    $s['nisn'] ?? '',
+                    $s['namaLengkap'],
+                    $s['jenisKelaminLabel'] ?? $s['jenisKelamin'],
+                    $s['kelasNama'] ?? '',
+                    $s['statusLabel'] ?? $s['status'],
+                    $s['nomorHp'] ?? '',
+                    $s['namaAyah'] ?: ($s['namaIbu'] ?: ($s['namaWali'] ?: '')),
+                    $s['noHpAyah'] ?: ($s['noHpIbu'] ?: ($s['noHpWali'] ?: '')),
+                ], ';');
+            }
+        }
+
+        rewind($output);
+        $csvContent = stream_get_contents($output);
+        fclose($output);
+
+        return new Response((string) $csvContent, 200, $headers);
+    }
+
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(int $id, SiswaService $service, Inertia $inertia): Response
     {

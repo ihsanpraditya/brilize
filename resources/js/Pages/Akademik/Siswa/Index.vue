@@ -2,6 +2,7 @@
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import AppLayout from '../../../Layouts/AppLayout.vue'
+import ExportSiswaModal from './ExportSiswaModal.vue'
 import ImportSiswaModal from './ImportSiswaModal.vue'
 
 interface SiswaItem {
@@ -107,11 +108,17 @@ const selectedJk = ref(props.filters.jenis_kelamin ?? '')
 
 const isModalOpen = ref(false)
 const isImportModalOpen = ref(false)
+const isExportModalOpen = ref(false)
 const modalMode = ref<'create' | 'edit'>('create')
 const editingId = ref<number | null>(null)
 const activeTab = ref<'biodata' | 'ortu' | 'lainnya'>('biodata')
 
 const existingNisList = computed(() => props.siswaList.map(s => s.nis))
+const activeKelasNama = computed(() => {
+  if (!selectedKelas.value) return null
+  const k = props.options.kelas.find(item => String(item.id) === selectedKelas.value)
+  return k ? k.namaKelas : null
+})
 
 // Detail Modal
 const isDetailOpen = ref(false)
@@ -304,6 +311,15 @@ function deleteSiswa(item: SiswaItem) {
           <p class="text-sm opacity-70">Kelola buku induk siswa, data orang tua/wali, dan penempatan kelas rombel.</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
+          <button
+            @click="isExportModalOpen = true"
+            type="button"
+            class="btn btn-outline btn-success btn-sm shadow-xs gap-1.5 font-semibold"
+          >
+            <span>📤</span>
+            <span>Ekspor Siswa</span>
+            <span class="badge badge-xs badge-success text-success-content font-bold">Excel/CSV</span>
+          </button>
           <button
             @click="isImportModalOpen = true"
             type="button"
@@ -847,6 +863,16 @@ function deleteSiswa(item: SiswaItem) {
       :existing-nis-list="existingNisList"
       @close="isImportModalOpen = false"
       @success="router.reload({ preserveScroll: true })"
+    />
+
+    <!-- Modal Ekspor Data Siswa -->
+    <ExportSiswaModal
+      :is-open="isExportModalOpen"
+      :filtered-siswa-list="props.siswaList"
+      :total-siswa-count="props.statistics.total"
+      :current-filters="props.filters"
+      :active-kelas-nama="activeKelasNama"
+      @close="isExportModalOpen = false"
     />
   </AppLayout>
 </template>
