@@ -39,7 +39,9 @@ zip-deploy: build db-export
 		-x ".env.local" \
 		-x "var/cache/*" \
 		-x "var/log/*" \
-		-x "Makefile"
+		-x "Makefile" \
+		-x "$(DB_EXPORT_FILE)" \
+		-x "$(ZIP_DEPLOY)"
 	@echo "Archive 'deploy.zip' successfully created with PostgreSQL dump!"
 
 clean:

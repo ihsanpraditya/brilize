@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import AppLayout from '../../../Layouts/AppLayout.vue'
+import ImportKelasModal from './ImportKelasModal.vue'
 
 interface KelasItem {
   id: number
@@ -51,8 +52,11 @@ const selectedTahun = ref(props.filters.tahun_pelajaran_id ? String(props.filter
 const selectedTingkat = ref(props.filters.tingkat ? String(props.filters.tingkat) : '')
 
 const isModalOpen = ref(false)
+const isImportModalOpen = ref(false)
 const modalMode = ref<'create' | 'edit'>('create')
 const editingId = ref<number | null>(null)
+
+const existingKelasNames = computed(() => props.kelasList.map(k => k.namaKelas))
 
 const form = useForm({
   nama_kelas: '',
@@ -154,7 +158,16 @@ function hapus(item: KelasItem) {
           <h1 class="text-2xl font-bold tracking-tight text-base-content">Data Kelas & Rombongan Belajar</h1>
           <p class="text-sm opacity-70">Manajemen master kelas, alokasi tingkat, jurusan, dan penugasan wali kelas.</p>
         </div>
-        <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button
+            @click="isImportModalOpen = true"
+            type="button"
+            class="btn btn-outline btn-primary btn-sm md:btn-md shadow-xs gap-2 font-semibold"
+          >
+            <span>📥</span>
+            <span>Import Sekaligus</span>
+            <span class="badge badge-xs badge-primary font-bold">Excel/CSV</span>
+          </button>
           <button @click="openCreateModal" class="btn btn-primary btn-sm md:btn-md shadow-sm">
             + Tambah Kelas Baru
           </button>
@@ -286,8 +299,30 @@ function hapus(item: KelasItem) {
                 </tr>
 
                 <tr v-if="props.kelasList.length === 0">
-                  <td colspan="7" class="text-center py-12 opacity-60">
-                    Belum ada data kelas yang sesuai dengan filter. Klik tombol <b>+ Tambah Kelas Baru</b> untuk menambahkan.
+                  <td colspan="7" class="text-center py-12">
+                    <div class="max-w-md mx-auto space-y-3">
+                      <div class="text-4xl">📚</div>
+                      <div class="font-bold text-base text-base-content">Belum Ada Data Kelas</div>
+                      <p class="text-xs opacity-60">
+                        Belum ada data kelas yang sesuai dengan filter. Anda dapat menambah satu per satu atau langsung import puluhan kelas sekaligus dari file Excel / CSV.
+                      </p>
+                      <div class="flex items-center justify-center gap-2 pt-1">
+                        <button
+                          @click="isImportModalOpen = true"
+                          type="button"
+                          class="btn btn-primary btn-sm gap-1.5 font-bold shadow-xs"
+                        >
+                          <span>📥 Import dari Excel / CSV</span>
+                        </button>
+                        <button
+                          @click="openCreateModal"
+                          type="button"
+                          class="btn btn-outline btn-sm font-semibold"
+                        >
+                          + Tambah Manual
+                        </button>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -444,6 +479,17 @@ function hapus(item: KelasItem) {
         <button @click="closeModal">close</button>
       </form>
     </dialog>
+
+    <!-- Modal Import Data Kelas Sekaligus -->
+    <ImportKelasModal
+      :is-open="isImportModalOpen"
+      :active-tahun-id="props.options.activeTahunPelajaranId"
+      :tahun-options="props.options.tahunPelajaranOptions"
+      :guru-options="props.options.guruOptions"
+      :existing-kelas-names="existingKelasNames"
+      @close="isImportModalOpen = false"
+      @success="applyFilter"
+    />
 
   </AppLayout>
 </template>

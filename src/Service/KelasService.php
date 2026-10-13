@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\DTO\Kelas\CreateKelasDTO;
+use App\DTO\Kelas\ImportKelasBatchDTO;
+use App\DTO\Kelas\ImportKelasResultDTO;
 use App\DTO\Kelas\KelasResponseDTO;
 use App\DTO\Kelas\UpdateKelasDTO;
 use App\Entity\Kelas;
@@ -12,6 +14,7 @@ use App\Enum\UserRole;
 use App\Repository\KelasRepository;
 use App\Repository\TahunPelajaranRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 
 final readonly class KelasService
@@ -20,6 +23,7 @@ final readonly class KelasService
         private KelasRepository $kelasRepository,
         private TahunPelajaranRepository $tahunPelajaranRepository,
         private UserRepository $userRepository,
+        private EntityManagerInterface $entityManager,
     ) {}
 
     /**
@@ -150,6 +154,120 @@ final readonly class KelasService
         if ($kelas !== null) {
             $this->kelasRepository->remove($kelas, true);
         }
+    }
+
+    public function importKelas(ImportKelasBatchDTO $dto): ImportKelasResultDTO
+    {
+        if (empty($dto->items)) {
+            return new ImportKelasResultDTO(0, 0, 0, 0, ['Tidak ada data kelas yang valid untuk diimpor.']);
+        }
+
+        $tahunPelajaran = null;
+        if ($dto->tahunPelajaranId !== null) {
+            $tahunPelajaran = $this->tahunPelajaranRepository->find($dto->tahunPelajaranId);
+        } else {
+            $tahunPelajaran = $this->tahunPelajaranRepository->findActive();
+        }
+
+        // Siapkan lookup map untuk guru pengampu / wali kelas
+        $guruList = $this->userRepository->searchUsers();
+        $guruMapById = [];
+        $guruMapByNip = [];
+        $guruMapByName = [];
+        foreach ($guruList as $guru) {
+            $guruMapById[(string) $guru->getId()] = $guru;
+            if ($guru->getIdentifierNumber()) {
+                $guruMapByNip[strtolower(trim($guru->getIdentifierNumber()))] = $guru;
+            }
+            $guruMapByName[strtolower(trim($guru->getName()))] = $guru;
+        }
+
+        $totalProcessed = 0;
+        $totalCreated = 0;
+        $totalUpdated = 0;
+        $totalSkipped = 0;
+        $errors = [];
+
+        foreach ($dto->items as $item) {
+            $namaKelas = trim($item->namaKelas);
+            if ($namaKelas === '') {
+                $totalSkipped++;
+                continue;
+            }
+
+            $totalProcessed++;
+
+            // Cari wali kelas jika diisi
+            $waliKelas = null;
+            if ($item->waliKelas !== null && $item->waliKelas !== '') {
+                $rawWali = trim($item->waliKelas);
+                if (isset($guruMapById[$rawWali])) {
+                    $waliKelas = $guruMapById[$rawWali];
+                } elseif (isset($guruMapByNip[strtolower($rawWali)])) {
+                    $waliKelas = $guruMapByNip[strtolower($rawWali)];
+                } elseif (isset($guruMapByName[strtolower($rawWali)])) {
+                    $waliKelas = $guruMapByName[strtolower($rawWali)];
+                } else {
+                    // Coba partial match nama guru
+                    foreach ($guruMapByName as $guruName => $g) {
+                        if (str_contains($guruName, strtolower($rawWali)) || str_contains(strtolower($rawWali), $guruName)) {
+                            $waliKelas = $g;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Cek kelas yang sudah ada dengan nama & tahun pelajaran yang sama
+            $existing = $this->kelasRepository->findOneBy([
+                'namaKelas' => $namaKelas,
+                'tahunPelajaran' => $tahunPelajaran,
+            ]);
+
+            if ($existing !== null) {
+                if ($dto->onDuplicate === 'update') {
+                    $existing->setTingkat($item->tingkat);
+                    if ($item->jurusan !== null) {
+                        $existing->setJurusan($item->jurusan);
+                    }
+                    if ($waliKelas !== null) {
+                        $existing->setWaliKelas($waliKelas);
+                    }
+                    $existing->setKapasitas($item->kapasitas);
+                    if ($item->keterangan !== null) {
+                        $existing->setKeterangan($item->keterangan);
+                    }
+                    $existing->setIsActive($item->isActive);
+                    $this->kelasRepository->save($existing, false);
+                    $totalUpdated++;
+                } else {
+                    $totalSkipped++;
+                }
+            } else {
+                $newKelas = new Kelas();
+                $newKelas->setNamaKelas($namaKelas);
+                $newKelas->setTingkat($item->tingkat);
+                $newKelas->setJurusan($item->jurusan);
+                $newKelas->setTahunPelajaran($tahunPelajaran);
+                $newKelas->setWaliKelas($waliKelas);
+                $newKelas->setKapasitas($item->kapasitas);
+                $newKelas->setKeterangan($item->keterangan);
+                $newKelas->setIsActive($item->isActive);
+
+                $this->kelasRepository->save($newKelas, false);
+                $totalCreated++;
+            }
+        }
+
+        $this->entityManager->flush();
+
+        return new ImportKelasResultDTO(
+            totalProcessed: $totalProcessed,
+            totalCreated: $totalCreated,
+            totalUpdated: $totalUpdated,
+            totalSkipped: $totalSkipped,
+            errors: $errors,
+        );
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Akademik;
 
 use App\DTO\Kelas\CreateKelasDTO;
+use App\DTO\Kelas\ImportKelasBatchDTO;
 use App\DTO\Kelas\UpdateKelasDTO;
 use App\Service\KelasService;
 use Nytodev\InertiaBundle\Service\Inertia;
@@ -81,6 +82,27 @@ final class KelasController extends AbstractController
             $this->addFlash('success', 'Data Kelas berhasil dihapus.');
         } catch (InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('akademik_kelas_index');
+    }
+
+    #[Route('/import', name: 'import', methods: ['POST'])]
+    public function import(Request $request, KelasService $service): Response
+    {
+        $dto = ImportKelasBatchDTO::fromRequest($request);
+
+        try {
+            $result = $service->importKelas($dto);
+            if ($result->totalCreated > 0 || $result->totalUpdated > 0) {
+                $this->addFlash('success', $result->getSummaryMessage());
+            } elseif ($result->totalSkipped > 0) {
+                $this->addFlash('error', $result->getSummaryMessage());
+            } else {
+                $this->addFlash('error', 'Tidak ada data kelas yang dapat diimpor.');
+            }
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Gagal memproses import data kelas: ' . $e->getMessage());
         }
 
         return $this->redirectToRoute('akademik_kelas_index');
