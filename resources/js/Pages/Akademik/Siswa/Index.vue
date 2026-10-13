@@ -2,6 +2,7 @@
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import AppLayout from '../../../Layouts/AppLayout.vue'
+import ImportSiswaModal from './ImportSiswaModal.vue'
 
 interface SiswaItem {
   id: number
@@ -105,9 +106,12 @@ const selectedStatus = ref(props.filters.status ?? '')
 const selectedJk = ref(props.filters.jenis_kelamin ?? '')
 
 const isModalOpen = ref(false)
+const isImportModalOpen = ref(false)
 const modalMode = ref<'create' | 'edit'>('create')
 const editingId = ref<number | null>(null)
 const activeTab = ref<'biodata' | 'ortu' | 'lainnya'>('biodata')
+
+const existingNisList = computed(() => props.siswaList.map(s => s.nis))
 
 // Detail Modal
 const isDetailOpen = ref(false)
@@ -299,7 +303,16 @@ function deleteSiswa(item: SiswaItem) {
           <h1 class="text-2xl font-bold tracking-tight text-base-content">Direktori Siswa</h1>
           <p class="text-sm opacity-70">Kelola buku induk siswa, data orang tua/wali, dan penempatan kelas rombel.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button
+            @click="isImportModalOpen = true"
+            type="button"
+            class="btn btn-outline btn-primary btn-sm shadow-xs gap-2 font-semibold"
+          >
+            <span>📥</span>
+            <span>Import Siswa Sekaligus</span>
+            <span class="badge badge-xs badge-primary font-bold">Excel/CSV</span>
+          </button>
           <button @click="openCreateModal" class="btn btn-primary btn-sm shadow-sm gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -447,12 +460,29 @@ function deleteSiswa(item: SiswaItem) {
               </tr>
 
               <tr v-if="props.siswaList.length === 0">
-                <td colspan="8" class="text-center py-12 opacity-60">
-                  <div class="flex flex-col items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <span>Tidak ada data siswa yang ditemukan.</span>
+                <td colspan="8" class="text-center py-12">
+                  <div class="max-w-md mx-auto space-y-3">
+                    <div class="text-4xl">👨‍🎓</div>
+                    <div class="font-bold text-base text-base-content">Belum Ada Data Siswa</div>
+                    <p class="text-xs opacity-60">
+                      Belum ada data siswa yang sesuai dengan filter. Anda dapat menambah data satu per satu atau langsung import ratusan siswa sekaligus dari file Excel Dapodik / CSV.
+                    </p>
+                    <div class="flex items-center justify-center gap-2 pt-1">
+                      <button
+                        @click="isImportModalOpen = true"
+                        type="button"
+                        class="btn btn-primary btn-sm gap-1.5 font-bold shadow-xs"
+                      >
+                        <span>📥 Import Siswa dari Excel / CSV</span>
+                      </button>
+                      <button
+                        @click="openCreateModal"
+                        type="button"
+                        class="btn btn-outline btn-sm font-semibold"
+                      >
+                        + Tambah Manual
+                      </button>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -809,5 +839,14 @@ function deleteSiswa(item: SiswaItem) {
         </div>
       </div>
     </dialog>
+
+    <!-- Modal Import Siswa Sekaligus -->
+    <ImportSiswaModal
+      :is-open="isImportModalOpen"
+      :kelas-list="props.options.kelas"
+      :existing-nis-list="existingNisList"
+      @close="isImportModalOpen = false"
+      @success="router.reload({ preserveScroll: true })"
+    />
   </AppLayout>
 </template>

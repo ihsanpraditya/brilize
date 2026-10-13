@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Akademik;
 
 use App\DTO\Siswa\CreateSiswaDTO;
+use App\DTO\Siswa\ImportSiswaBatchDTO;
 use App\DTO\Siswa\UpdateSiswaDTO;
 use App\Enum\JenisKelamin;
 use App\Enum\StatusSiswa;
@@ -126,6 +127,27 @@ final class SiswaController extends AbstractController
             $this->addFlash('success', sprintf('Status siswa "%s" berhasil %s.', $updated->namaLengkap, $statusText));
         } catch (InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('akademik_siswa_index');
+    }
+
+    #[Route('/import', name: 'import', methods: ['POST'])]
+    public function import(Request $request, SiswaService $service): Response
+    {
+        $dto = ImportSiswaBatchDTO::fromRequest($request);
+
+        try {
+            $result = $service->importSiswa($dto);
+            if ($result->totalCreated > 0 || $result->totalUpdated > 0) {
+                $this->addFlash('success', $result->getSummaryMessage());
+            } elseif ($result->totalSkipped > 0) {
+                $this->addFlash('error', $result->getSummaryMessage());
+            } else {
+                $this->addFlash('error', 'Tidak ada data siswa yang dapat diimpor.');
+            }
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Gagal memproses import data siswa: ' . $e->getMessage());
         }
 
         return $this->redirectToRoute('akademik_siswa_index');

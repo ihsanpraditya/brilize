@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\DTO\Siswa\CreateSiswaDTO;
+use App\DTO\Siswa\ImportSiswaBatchDTO;
+use App\DTO\Siswa\ImportSiswaResultDTO;
 use App\DTO\Siswa\SiswaResponseDTO;
 use App\DTO\Siswa\UpdateSiswaDTO;
 use App\Entity\Siswa;
@@ -269,6 +271,247 @@ final readonly class SiswaService
         $this->siswaRepository->save($siswa, true);
 
         return SiswaResponseDTO::fromEntity($siswa);
+    }
+
+    public function importSiswa(ImportSiswaBatchDTO $dto): ImportSiswaResultDTO
+    {
+        if (empty($dto->items)) {
+            return new ImportSiswaResultDTO(0, 0, 0, 0, ['Tidak ada data siswa yang valid untuk diimpor.']);
+        }
+
+        // Siapkan lookup map untuk Kelas
+        $allKelas = $this->kelasRepository->findAll();
+        $kelasMapById = [];
+        $kelasMapByName = [];
+        $kelasMapByNormalized = [];
+
+        foreach ($allKelas as $k) {
+            $id = (int) $k->getId();
+            $kelasMapById[$id] = $k;
+            $nameLower = strtolower(trim($k->getNamaKelas()));
+            $kelasMapByName[$nameLower] = $k;
+            $normalized = preg_replace('/[^a-z0-9]/', '', $nameLower);
+            if ($normalized) {
+                $kelasMapByNormalized[$normalized] = $k;
+            }
+        }
+
+        $defaultKelas = null;
+        if ($dto->defaultKelasId !== null && isset($kelasMapById[$dto->defaultKelasId])) {
+            $defaultKelas = $kelasMapById[$dto->defaultKelasId];
+        }
+
+        $totalProcessed = 0;
+        $totalCreated = 0;
+        $totalUpdated = 0;
+        $totalSkipped = 0;
+        $errors = [];
+
+        foreach ($dto->items as $item) {
+            $nis = trim($item->nis);
+            $namaLengkap = trim($item->namaLengkap);
+
+            if ($nis === '' || $namaLengkap === '') {
+                $totalSkipped++;
+                continue;
+            }
+
+            $totalProcessed++;
+
+            // Resolusi kelas
+            $kelas = null;
+            if ($item->kelas !== null && $item->kelas !== '') {
+                $rawKelas = trim($item->kelas);
+                if (is_numeric($rawKelas) && isset($kelasMapById[(int) $rawKelas])) {
+                    $kelas = $kelasMapById[(int) $rawKelas];
+                } else {
+                    $kLower = strtolower($rawKelas);
+                    $kNorm = preg_replace('/[^a-z0-9]/', '', $kLower);
+                    if (isset($kelasMapByName[$kLower])) {
+                        $kelas = $kelasMapByName[$kLower];
+                    } elseif ($kNorm && isset($kelasMapByNormalized[$kNorm])) {
+                        $kelas = $kelasMapByNormalized[$kNorm];
+                    }
+                }
+            }
+
+            if ($kelas === null) {
+                $kelas = $defaultKelas;
+            }
+
+            $existing = $this->siswaRepository->findOneBy(['nis' => $nis]);
+
+            $tanggalLahir = $this->parseDateSafe($item->tanggalLahir);
+            $tanggalMasuk = $this->parseDateSafe($item->tanggalMasuk);
+
+            if ($existing !== null) {
+                if ($dto->onDuplicate === 'update') {
+                    $existing->setNamaLengkap($namaLengkap);
+                    $existing->setJenisKelamin($item->jenisKelamin);
+                    if ($item->nisn !== null) $existing->setNisn($item->nisn);
+                    if ($item->nik !== null) $existing->setNik($item->nik);
+                    if ($item->namaPanggilan !== null) $existing->setNamaPanggilan($item->namaPanggilan);
+                    if ($item->namaArab !== null) $existing->setNamaArab($item->namaArab);
+                    if ($item->tempatLahir !== null) $existing->setTempatLahir($item->tempatLahir);
+                    if ($tanggalLahir !== null) $existing->setTanggalLahir($tanggalLahir);
+                    if ($item->agama !== null) $existing->setAgama($item->agama);
+                    if ($item->alamat !== null) $existing->setAlamat($item->alamat);
+                    if ($item->rt !== null) $existing->setRt($item->rt);
+                    if ($item->rw !== null) $existing->setRw($item->rw);
+                    if ($item->kelurahan !== null) $existing->setKelurahan($item->kelurahan);
+                    if ($item->kecamatan !== null) $existing->setKecamatan($item->kecamatan);
+                    if ($item->kabupatenKota !== null) $existing->setKabupatenKota($item->kabupatenKota);
+                    if ($item->provinsi !== null) $existing->setProvinsi($item->provinsi);
+                    if ($item->kodePos !== null) $existing->setKodePos($item->kodePos);
+                    if ($item->nomorHp !== null) $existing->setNomorHp($item->nomorHp);
+                    if ($item->email !== null) $existing->setEmail($item->email);
+                    if ($kelas !== null) $existing->setKelas($kelas);
+                    $existing->setStatus($item->status);
+                    if ($item->namaAyah !== null) $existing->setNamaAyah($item->namaAyah);
+                    if ($item->pekerjaanAyah !== null) $existing->setPekerjaanAyah($item->pekerjaanAyah);
+                    if ($item->penghasilanAyah !== null) $existing->setPenghasilanAyah($item->penghasilanAyah);
+                    if ($item->noHpAyah !== null) $existing->setNoHpAyah($item->noHpAyah);
+                    if ($item->namaIbu !== null) $existing->setNamaIbu($item->namaIbu);
+                    if ($item->pekerjaanIbu !== null) $existing->setPekerjaanIbu($item->pekerjaanIbu);
+                    if ($item->penghasilanIbu !== null) $existing->setPenghasilanIbu($item->penghasilanIbu);
+                    if ($item->noHpIbu !== null) $existing->setNoHpIbu($item->noHpIbu);
+                    if ($item->namaWali !== null) $existing->setNamaWali($item->namaWali);
+                    if ($item->hubunganWali !== null) $existing->setHubunganWali($item->hubunganWali);
+                    if ($item->pekerjaanWali !== null) $existing->setPekerjaanWali($item->pekerjaanWali);
+                    if ($item->noHpWali !== null) $existing->setNoHpWali($item->noHpWali);
+                    if ($item->alamatOrangTua !== null) $existing->setAlamatOrangTua($item->alamatOrangTua);
+                    if ($item->anakKe !== null) $existing->setAnakKe($item->anakKe);
+                    if ($item->jumlahSaudara !== null) $existing->setJumlahSaudara($item->jumlahSaudara);
+                    if ($tanggalMasuk !== null) $existing->setTanggalMasuk($tanggalMasuk);
+                    if ($item->asalSekolah !== null) $existing->setAsalSekolah($item->asalSekolah);
+                    if ($item->catatan !== null) $existing->setCatatan($item->catatan);
+                    $existing->setIsActive($item->isActive);
+
+                    $this->siswaRepository->save($existing, false);
+                    $totalUpdated++;
+                } else {
+                    $totalSkipped++;
+                }
+            } else {
+                $siswa = new Siswa();
+                $siswa->setNis($nis);
+                $siswa->setNamaLengkap($namaLengkap);
+                $siswa->setJenisKelamin($item->jenisKelamin);
+                $siswa->setNisn($item->nisn);
+                $siswa->setNik($item->nik);
+                $siswa->setNamaPanggilan($item->namaPanggilan);
+                $siswa->setNamaArab($item->namaArab);
+                $siswa->setTempatLahir($item->tempatLahir);
+                $siswa->setTanggalLahir($tanggalLahir);
+                $siswa->setAgama($item->agama ?? 'Islam');
+                $siswa->setAlamat($item->alamat);
+                $siswa->setRt($item->rt);
+                $siswa->setRw($item->rw);
+                $siswa->setKelurahan($item->kelurahan);
+                $siswa->setKecamatan($item->kecamatan);
+                $siswa->setKabupatenKota($item->kabupatenKota);
+                $siswa->setProvinsi($item->provinsi);
+                $siswa->setKodePos($item->kodePos);
+                $siswa->setNomorHp($item->nomorHp);
+                $siswa->setEmail($item->email);
+                $siswa->setKelas($kelas);
+                $siswa->setStatus($item->status);
+                $siswa->setNamaAyah($item->namaAyah);
+                $siswa->setPekerjaanAyah($item->pekerjaanAyah);
+                $siswa->setPenghasilanAyah($item->penghasilanAyah);
+                $siswa->setNoHpAyah($item->noHpAyah);
+                $siswa->setNamaIbu($item->namaIbu);
+                $siswa->setPekerjaanIbu($item->pekerjaanIbu);
+                $siswa->setPenghasilanIbu($item->penghasilanIbu);
+                $siswa->setNoHpIbu($item->noHpIbu);
+                $siswa->setNamaWali($item->namaWali);
+                $siswa->setHubunganWali($item->hubunganWali);
+                $siswa->setPekerjaanWali($item->pekerjaanWali);
+                $siswa->setNoHpWali($item->noHpWali);
+                $siswa->setAlamatOrangTua($item->alamatOrangTua);
+                $siswa->setAnakKe($item->anakKe);
+                $siswa->setJumlahSaudara($item->jumlahSaudara);
+                $siswa->setTanggalMasuk($tanggalMasuk);
+                $siswa->setAsalSekolah($item->asalSekolah);
+                $siswa->setCatatan($item->catatan);
+                $siswa->setIsActive($item->isActive);
+
+                // Opsi Buat Akun User Siswa
+                if ($dto->createUserAccount) {
+                    $username = strtolower($nis);
+                    $existingUser = $this->userRepository->findOneBy(['username' => $username]);
+                    if ($existingUser === null) {
+                        $user = new User();
+                        $user->setName($namaLengkap);
+                        $user->setUsername($username);
+                        $user->setIdentifierNumber($item->nisn ?? $nis);
+                        $user->setEmail($item->email);
+                        $user->setPhone($item->nomorHp);
+                        $user->setRoles([UserRole::SISWA->value]);
+                        $user->setStatus(UserStatus::ACTIVE);
+
+                        // Default password: NIS siswa
+                        $user->setPassword(password_hash($nis, PASSWORD_BCRYPT));
+                        $this->em->persist($user);
+                        $siswa->setUser($user);
+                    } else {
+                        $siswa->setUser($existingUser);
+                    }
+                }
+
+                $this->siswaRepository->save($siswa, false);
+                $totalCreated++;
+            }
+        }
+
+        $this->em->flush();
+
+        return new ImportSiswaResultDTO(
+            totalProcessed: $totalProcessed,
+            totalCreated: $totalCreated,
+            totalUpdated: $totalUpdated,
+            totalSkipped: $totalSkipped,
+            errors: $errors,
+        );
+    }
+
+    private function parseDateSafe(?string $raw): ?DateTimeImmutable
+    {
+        if ($raw === null || trim($raw) === '') {
+            return null;
+        }
+
+        $raw = trim($raw);
+
+        // Format YYYY-MM-DD
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw)) {
+            $dt = DateTimeImmutable::createFromFormat('Y-m-d', $raw);
+            if ($dt !== false) {
+                return $dt;
+            }
+        }
+
+        // Format DD/MM/YYYY
+        if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $raw)) {
+            $dt = DateTimeImmutable::createFromFormat('d/m/Y', $raw);
+            if ($dt !== false) {
+                return $dt;
+            }
+        }
+
+        // Format DD-MM-YYYY
+        if (preg_match('/^\d{1,2}-\d{1,2}-\d{4}$/', $raw)) {
+            $dt = DateTimeImmutable::createFromFormat('d-m-Y', $raw);
+            if ($dt !== false) {
+                return $dt;
+            }
+        }
+
+        try {
+            return new DateTimeImmutable($raw);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
